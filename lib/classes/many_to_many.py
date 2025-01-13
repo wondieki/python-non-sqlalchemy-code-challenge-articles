@@ -1,89 +1,18 @@
+
 class Article:
-    _articles_list = []
+    _all_articles = []
 
-    def __init__(self, writer, journal, headline):
-        if not isinstance(writer, Writer):
-            raise ValueError("Writer must be an instance of Writer.")
-        if not isinstance(journal, Journal):
-            raise ValueError("Journal must be an instance of Journal.")
-        if not isinstance(headline, str) or not (6 <= len(headline) <= 60):
-            raise ValueError("Headline must be a string between 6 and 60 characters.")
-        self._writer = writer
-        self._journal = journal
-        self._headline = headline
-        Article._articles_list.append(self)
-
-    @property
-    def headline(self):
-        return self._headline
-
-    @headline.setter
-    def headline(self, new_headline):
-        if not isinstance(new_headline, str) or not (6 <= len(new_headline) <= 60):
-            raise ValueError("Headline must be a string between 6 and 60 characters.")
-        self._headline = new_headline
-
-    @property
-    def writer(self):
-        return self._writer
-
-    @property
-    def journal(self):
-        return self._journal
-
-    @writer.setter
-    def writer(self, new_writer):
-        if not isinstance(new_writer, Writer):
-            raise ValueError("Writer must be an instance of Writer.")
-        self._writer = new_writer
-
-    @journal.setter
-    def journal(self, new_journal):
-        if not isinstance(new_journal, Journal):
-            raise ValueError("Journal must be an instance of Journal.")
-        self._journal = new_journal
-
-    @classmethod
-    def get_all(cls):
-        return cls._articles_list
-
-
-class Writer:
-    def __init__(self, full_name):
-        if not isinstance(full_name, str) or len(full_name) == 0:
-            raise ValueError("Full name must be a non-empty string.")
-        self._full_name = full_name
-
-    @property
-    def full_name(self):
-        return self._full_name
-
-    def authored_articles(self):
-        return [article for article in Article._articles_list if article.writer == self]
-
-    def journals(self):
-        return list(set(article.journal for article in self.authored_articles()))
-
-    def publish_article(self, journal, headline):
-        return Article(self, journal, headline)
-
-    def areas_of_expertise(self):
-        if not self.authored_articles():
-            return None
-        return list(set(journal.category_type for journal in self.journals()))
-
-
-class Journal:
-    _journals_list = []
-
-    def __init__(self, title, category_type):
-        if not isinstance(title, str) or not (3 <= len(title) <= 18):
-            raise ValueError("Title must be a string between 3 and 18 characters.")
-        if not isinstance(category_type, str) or len(category_type) == 0:
-            raise ValueError("Category must be a non-empty string.")
+    def __init__(self, author, magazine, title):
+        if not isinstance(author, Author):
+            raise ValueError("Author must be an instance of Author.")
+        if not isinstance(magazine, Magazine):
+            raise ValueError("Magazine must be an instance of Magazine.")
+        if not isinstance(title, str) or not (5 <= len(title) <= 50):
+            raise ValueError("Title must be a string between 5 and 50 characters.")
+        self._author = author
+        self._magazine = magazine
         self._title = title
-        self._category_type = category_type
-        Journal._journals_list.append(self)
+        Article._all_articles.append(self)
 
     @property
     def title(self):
@@ -91,37 +20,109 @@ class Journal:
 
     @title.setter
     def title(self, new_title):
-        if not isinstance(new_title, str) or not (3 <= len(new_title) <= 18):
-            raise ValueError("Title must be a string between 3 and 18 characters.")
+        if not isinstance(new_title, str) or not (5 <= len(new_title) <= 50):
+            raise ValueError("Title must be a string between 5 and 50 characters.")
         self._title = new_title
 
     @property
-    def category_type(self):
-        return self._category_type
+    def author(self):
+        return self._author
 
-    @category_type.setter
-    def category_type(self, new_category_type):
-        if not isinstance(new_category_type, str) or len(new_category_type) == 0:
-            raise ValueError("Category must be a non-empty string.")
-        self._category_type = new_category_type
+    @property
+    def magazine(self):
+        return self._magazine
 
-    def published_articles(self):
-        return [article for article in Article._articles_list if article.journal == self]
+    @author.setter
+    def author(self, new_author):
+        if not isinstance(new_author, Author):
+            raise ValueError("Author must be an instance of Author.")
+        self._author = new_author
 
-    def contributors(self):
-        return list(set(article.writer for article in self.published_articles()))
-
-    def article_titles(self):
-        titles = [article.headline for article in self.published_articles()]
-        return titles if titles else None
-
-    def main_contributors(self):
-        authors = [article.writer for article in self.published_articles()]
-        prominent = [author for author in set(authors) if authors.count(author) >= 2]
-        return prominent if prominent else None
+    @magazine.setter
+    def magazine(self, new_magazine):
+        if not isinstance(new_magazine, Magazine):
+            raise ValueError("Magazine must be an instance of Magazine.")
+        self._magazine = new_magazine
 
     @classmethod
-    def leading_publisher(cls):
-        if not Article._articles_list:
+    def all_articles(cls):
+        return cls._all_articles
+
+
+class Author:
+    def __init__(self, name):
+        if not isinstance(name, str) or len(name) == 0:
+            raise ValueError("Name must be a non-empty string.")
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
+    def articles(self):
+        return [article for article in Article._all_articles if article.author == self]
+
+    def magazines(self):
+        return list(set(article.magazine for article in self.articles()))
+
+    def add_article(self, magazine, title):
+        return Article(self, magazine, title)
+
+    def topic_areas(self):
+        if not self.articles():
             return None
-        return max(cls._journals_list, key=lambda journal: len(journal.published_articles()))
+        return list(set(magazine.category for magazine in self.magazines()))
+
+
+class Magazine:
+    _all_magazines = []
+
+    def __init__(self, name, category):
+        if not isinstance(name, str) or not (2 <= len(name) <= 16):
+            raise ValueError("Name must be a string between 2 and 16 characters.")
+        if not isinstance(category, str) or len(category) == 0:
+            raise ValueError("Category must be a non-empty string.")
+        self._name = name
+        self._category = category
+        Magazine._all_magazines.append(self)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        if not isinstance(new_name, str) or not (2 <= len(new_name) <= 16):
+            raise ValueError("Name must be a string between 2 and 16 characters.")
+        self._name = new_name
+
+    @property
+    def category(self):
+        return self._category
+
+    @category.setter
+    def category(self, new_category):
+        if not isinstance(new_category, str) or len(new_category) == 0:
+            raise ValueError("Category must be a non-empty string.")
+        self._category = new_category
+
+    def articles(self):
+        return [article for article in Article._all_articles if article.magazine == self]
+
+    def contributors(self):
+        return list(set(article.author for article in self.articles()))
+
+    def article_titles(self):
+        titles = [article.title for article in self.articles()]
+        return titles if titles else None
+
+    def contributing_authors(self):
+        authors = [article.author for article in self.articles()]
+        contributing = [author for author in set(authors) if authors.count(author) >= 2]
+        return contributing if contributing else None
+
+    @classmethod
+    def most_published(cls):
+        if not Article._all_articles:
+            return None
+        return max(cls._all_magazines, key=lambda mag: len(mag.articles()))
